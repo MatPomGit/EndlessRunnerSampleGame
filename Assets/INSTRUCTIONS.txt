@@ -1,110 +1,322 @@
-Code architecture notes
------------------------
+Notatki o Architekturze Kodu - Przewodnik dla Studentów
+========================================================
 
-This document isn't intended as a tutorial, but as global indications on how the
-code is organised.
-
-
-Building
---------
-before building, you need to build the addressable assets. 
-
-- Open the addressable window:
-    - Window > Assets Management > Addressable on older ddressable package 
-    - Windows > Assets Management > Addressable > Group on newer package (1.8 >)
-- On the top toolbar on the window :
-	- click on 
-
-This will build all the asset bundle for the current platform and store theme in the Library folder.
-
-You can now hit the Build (or Build and Run) button in the Build Window (File > Build Settings...).
-The Addressable system will take care of trasnfering the asset bundle in the streaming folder before
-building so it can load it at runtime. 
-
-Services
---------
-
-By default all the services are disabled. When you enable all services, switch to a mobile
-platform as some services (e.g. Ads) only works on mobile platforms.
-
-There is a special case for Unity In App Purchase : once you enable in app purchase
-in the service windows, it will import a package into your project. Check in
-'Plugins/UnityPurchasing' folder and you should see a UnityIAP and UnityChannel package.
-Double click on UnityIAP first, import its content, then on UnityChannel. IAP should now
-work in your project.
-
-Now go into 'Plugins/UnityPurchasing/Resources' and look for UIFakeStoreCanvas
-prefab, and change the Canvas sort order to 100. That will make it appear on
-top of all canvas in the game, useful to test IAP in editor.
-
-Ads integrations
-----------------
-
-Ads integration is using multiple placementID. That allow to define different behaviour per ads.
-If you look at the ads script (e.g. AdsForMission and GameState) you'll see it have a public field called adsPlacementId.
-(those value are set in editor to different value that the default rewardVideo)
-
-Now if you log into your Ads Dashboard in a browser and navigate to your project, click on a platform,
-you will have a list of Ad Placement. There you can add new placement. By default Trash Dash use 2 in addition
-to the default "rewardVideo" and "Video" :
-
-- reviveVideo, used to have a second chance after game over
-- missionVideo, used to get a thrid possible missions.
+Ten dokument został stworzony jako przewodnik po organizacji kodu w projekcie.
+Jeśli jesteś studentem i po raz pierwszy pracujesz z takim projektem, nie martw się!
+Wszystko zostanie wyjaśnione krok po kroku.
 
 
-Game States
------------
+Budowanie Projektu - Instrukcja Krok po Kroku
+==============================================
 
-The whole game is using a state machine to handle the different states of the
-game : Loadout, Game and Gameover.
-The State Machine, called GameManager (Scripts/GameManager) is manually updating
-the state on the top of its states list. When pushing a new state on top, you
-can decide to pop the previous one or leave it and place the new one on top.
-That allow things like pushing the GameOver state on top of the Game State,
-keeping all game state intact to go back to it as it was.
+WAŻNE: Zanim zbudujesz grę, musisz najpierw zbudować zasoby addressable.
 
-Store
------
+Co to są Addressables?
+----------------------
+Addressables to system Unity, który pozwala na ładowanie zasobów (postaci, tekstur, dźwięków)
+w sposób dynamiczny w trakcie działania gry. Dzięki temu gra nie musi ładować wszystkiego
+na starcie, co przyspiesza uruchomienie i zmniejsza zużycie pamięci.
 
-The store could have been made with a state, but for the purpose of demoing
-another technique, it uses additive scene loading.
-The store is a separate scene with no camera and only UI. This allows us to load
-that scene additively over any state (Loadout or Gameover) and unload when exit.
+Jak zbudować Addressables - Szczegółowa Instrukcja:
+---------------------------------------------------
 
-Addressable
------------
+KROK 1: Otwórz okno Addressables w Unity
+   - Dla starszej wersji pakietu: Window > Assets Management > Addressable
+   - Dla nowszej wersji (1.8+): Window > Assets Management > Addressable > Groups
+   
+KROK 2: W górnym pasku narzędzi tego okna:
+   - Kliknij przycisk "Build" 
+   - Wybierz "New Build" > "Default Build Script"
+   
+KROK 3: Poczekaj na zakończenie
+   - Unity zbuduje wszystkie paczki zasobów (asset bundles) dla aktualnej platformy
+   - Zostaną one zapisane w folderze Library projektu
 
-Theme and Characters are in AssetBundles, defined through the Addressable Assets
-system. That mean that to add a new character, just make the prefab addressable
-and don't forget to add the label "character" to it. You can then place it in
-any Addressable Group, even a remote one, and the application will fetch it from
-the server on startup.
+KROK 4: Teraz możesz zbudować grę
+   - Otwórz okno Build: File > Build Settings...
+   - Kliknij "Build" lub "Build and Run"
+   - System Addressable automatycznie przeniesie paczki zasobów do folderu streamingowego
+     przed budowaniem, dzięki czemu gra będzie mogła je załadować podczas działania 
 
-Save File
----------
 
-The save file is stored locally. This is to keep the project
-simple, but a full product would require some kind of validation linked to the
-phone or an account. With the local save file, someone could potentially exploit items.
+Usługi Unity (Services) - Dla Zaawansowanych
+=============================================
 
-Shaders
+Co to są Unity Services?
+------------------------
+Unity Services to zestaw narzędzi dostarczanych przez Unity, które pozwalają dodać
+do gry funkcje takie jak:
+- Reklamy (Ads) - zarabianie na grze przez wyświetlanie reklam
+- Zakupy w aplikacji (In-App Purchases) - sprzedawanie przedmiotów w grze
+- Analityka (Analytics) - zbieranie danych o zachowaniu graczy
+
+Uwaga dla Studentów:
+-------------------
+Domyślnie wszystkie usługi są WYŁĄCZONE w tym projekcie. To dobre podejście podczas nauki,
+ponieważ można skupić się na mechanice gry bez komplikowania projektu.
+
+Jeśli chcesz włączyć usługi (opcjonalne):
+-----------------------------------------
+1. Przełącz platformę na mobilną (Android lub iOS) w Build Settings
+   - Niektóre usługi (np. Ads) działają TYLKO na platformach mobilnych
+   
+2. Dla zakupów w aplikacji (In-App Purchase):
+   a) Włącz IAP w oknie Services (Window > General > Services)
+   b) Unity zaimportuje pakiet do projektu
+   c) Sprawdź folder 'Plugins/UnityPurchasing' - powinny być tam dwa paczki:
+      - UnityIAP
+      - UnityChannel
+   d) Kliknij dwukrotnie NAJPIERW na UnityIAP, zaimportuj zawartość
+   e) Potem kliknij dwukrotnie na UnityChannel, zaimportuj zawartość
+   f) IAP powinno teraz działać
+   
+3. Testowanie IAP w edytorze:
+   - Przejdź do 'Plugins/UnityPurchasing/Resources'
+   - Znajdź prefab UIFakeStoreCanvas
+   - Zmień "Canvas Sort Order" na 100
+   - To sprawi, że okno testowe pojawi się na wierzchu wszystkich innych okien
+
+
+Integracja Reklam (Ads) - Szczegóły Techniczne
+===============================================
+
+Jak działają reklamy w tym projekcie?
+-------------------------------------
+Projekt używa różnych "placementID" dla różnych reklam. PlacementID to unikalny
+identyfikator, który określa GDZIE i JAK reklama ma się wyświetlić.
+
+Dlaczego używamy wielu placementID?
+-----------------------------------
+Różne miejsca w grze wymagają różnego zachowania reklam:
+- Po Game Over - reklama za dodatkowe życie
+- W menu misji - reklama za dodatkową misję
+Każde z tych miejsc ma swój własny placementID.
+
+Gdzie to zobaczyć w kodzie?
+---------------------------
+Sprawdź skrypty reklam (np. AdsForMission.cs i GameState.cs).
+Zobaczysz tam publiczne pole 'adsPlacementId' - te wartości są ustawione
+w edytorze Unity na różne wartości niż domyślne "rewardVideo".
+
+Konfiguracja w Dashboard:
+-------------------------
+1. Zaloguj się do Ads Dashboard w przeglądarce
+2. Przejdź do swojego projektu
+3. Kliknij na platformę (Android/iOS)
+4. Zobaczysz listę "Ad Placement"
+5. Możesz dodać nowe placement
+
+Domyślnie ten projekt używa 3 placementów:
+- "rewardVideo" (domyślny) - ogólne nagradzające wideo
+- "reviveVideo" - reklama za drugą szansę po przegranej
+- "missionVideo" - reklama za trzecią możliwą misję
+
+
+Stany Gry (Game States) - Kluczowa Koncepcja
+============================================
+
+Co to jest State Machine (maszyna stanów)?
+------------------------------------------
+To wzorzec projektowy, który pozwala grze być w różnych "stanach" i przełączać
+się między nimi. Wyobraź sobie, że gra to maszyna, która może być w trybie:
+- Menu (Loadout) - gracz wybiera postać, kupuje przedmioty
+- Gra (Game) - gracz aktywnie gra
+- Game Over - gracz przegrał, widzi wynik
+
+Jak to działa w tym projekcie?
+------------------------------
+Cała gra używa maszynę stanów do obsługi różnych stanów gry: Loadout, Game i GameOver.
+
+Maszyna stanów, nazywana GameManager (znajdziesz w Scripts/GameManager), ręcznie
+aktualizuje stan na szczycie swojej listy stanów.
+
+Stos stanów (Stack):
+-------------------
+Stany są przechowywane na "stosie" (stack) - wyobraź sobie stos talerzy:
+- Możesz położyć nowy talerz NA WIERZCHU (push)
+- Możesz zdjąć talerz z wierzchu (pop)
+- Aktywny jest zawsze talerz NA GÓRZE
+
+Gdy dodajesz (push) nowy stan na szczyt, możesz:
+1. Usunąć poprzedni stan (pop) - całkowita zmiana
+2. Zostawić poprzedni stan pod spodem - tymczasowe nałożenie
+
+Przykład w praktyce:
+-------------------
+Gdy gracz przegra:
+- Stan GameOver zostaje położony (push) NA WIERZCHU stanu Game
+- Stan Game zostaje pod spodem (nie jest usunięty)
+- Dzięki temu cały stan gry (pozycja, wynik, etc.) pozostaje nietknięty
+- Gdybyśmy chcieli wrócić do gry (np. "continue"), wystarczy zdjąć (pop) GameOver
+
+
+Sklep (Store) - Ładowanie Scen Addytywne
+========================================
+
+Dlaczego sklep NIE jest stanem?
+-------------------------------
+Sklep mógłby być zrobiony jako stan w maszynie stanów, ale dla celów
+edukacyjnych został zaimplementowany INNĄ techniką - addytywnym ładowaniem scen.
+
+Co to jest addytywne ładowanie scen?
+------------------------------------
+Normalnie gdy ładujesz nową scenę, Unity ZASTĘPUJE aktualną scenę.
+Addytywne ładowanie pozwala DODAĆ scenę DO już istniejącej sceny.
+
+Jak to działa w sklepie?
+------------------------
+- Sklep to osobna scena (scene) BEZ kamery, tylko z UI
+- Gdy otwieramy sklep, scena sklepu jest ładowana ADDYTYWNIE nad aktualnym stanem
+  (może to być Loadout lub GameOver)
+- Wszystko z poprzedniej sceny nadal tam jest, tylko nie widać jej bo UI sklepu
+  jest na wierzchu
+- Gdy zamykamy sklep, scena sklepu jest wyładowywana (unload)
+- Wracamy dokładnie tam gdzie byliśmy
+
+Zalety tego podejścia:
+---------------------
+- Sklep może być otwarty z różnych miejsc w grze
+- Nie musimy duplikować kodu sklepu
+- Scena sklepu jest niezależna i łatwa w utrzymaniu
+
+
+System Addressable - Dynamiczne Ładowanie Zasobów
+==================================================
+
+Co to są Addressables?
+---------------------
+Addressables to nowoczesny system Unity do zarządzania zasobami (assets).
+Zastąpił starszy system Asset Bundles.
+
+Jak są używane w tym projekcie?
+-------------------------------
+Motywy (Themes) i Postacie (Characters) są w AssetBundles, zdefiniowanych
+przez system Addressable Assets.
+
+Jak dodać nową postać? - KROK PO KROKU:
+---------------------------------------
+1. Stwórz prefab postaci w Unity
+2. Zaznacz prefab w Project window
+3. W Inspectorze zaznacz checkbox "Addressable"
+4. WAŻNE: Dodaj etykietę (label) "character" do tego prefaba
+5. Możesz umieścić prefab w dowolnej Grupie Addressable
+6. Może to być nawet zdalna grupa (remote) - wtedy aplikacja pobierze
+   postać z serwera przy starcie gry
+
+Dlaczego to jest potężne narzędzie?
+-----------------------------------
+- Możesz dodawać nowe postacie BEZ przebudowywania całej gry
+- Postacie mogą być pobierane z internetu (DLC)
+- Gra ładuje tylko to, czego potrzebuje w danym momencie
+
+
+Plik Zapisu (Save File) - Uwagi o Bezpieczeństwie
+==================================================
+
+Gdzie są zapisywane dane?
+-------------------------
+Plik zapisu jest przechowywany LOKALNIE na urządzeniu gracza.
+
+Dlaczego lokalnie?
+-----------------
+To rozwiązanie upraszcza projekt i jest dobre do nauki. Jednak w prawdziwej,
+komercyjnej grze, plik zapisu powinien być:
+- Połączony z kontem gracza (np. Google Play, Game Center)
+- Walidowany na serwerze
+- Zaszyfrowany
+
+Potencjalny problem:
+-------------------
+Z lokalnym plikiem zapisu, ktoś mógłby potencjalnie:
+- Zmodyfikować plik
+- Oszukiwać (dodać sobie darmowe monety, odblokować postacie)
+
+Dla studentów:
+-------------
+To jest OK dla projektu edukacyjnego! W prawdziwej grze dodalibyście:
+1. Szyfrowanie pliku zapisu
+2. Walidację po stronie serwera
+3. System kont graczy
+
+
+Shadery (Shaders) - Grafika Niskopoziomowa
+==========================================
+
+Dlaczego gra używa własnych shaderów?
+-------------------------------------
+Większość obiektów w grze używa niestandardowych shaderów (custom shaders).
+Shader to program, który mówi karcie graficznej JAK narysować obiekt.
+
+Zakrzywienie świata (World Curving):
+------------------------------------
+Główny powód: świat w grze jest zakrzywiony w dół. Dlaczego?
+
+1. Wrażenie większej odległości - świat wygląda jakby ciągnął się dalej
+2. Ukrycie horyzontu - nie widać "końca świata"
+3. Ukrycie "poppingu" - nagłego pojawiania się nowych segmentów toru
+
+"Popping" to problem w grach endless runner:
+- Nowe fragmenty toru muszą się pojawić w pewnym momencie
+- Bez zakrzywienia gracz zobaczyłby jak nagle "wyrastają" z ziemi
+- Zakrzywienie w dół ukrywa ten moment za horyzontem
+
+Shader dla Fishbones:
+--------------------
+Jest też shader, który obraca fishbones (rybie ości - przeszkody w grze).
+
+Dlaczego w shaderze, a nie w skrypcie?
+- Shader działa NA KARCIE GRAFICZNEJ (GPU)
+- Skrypt działa NA PROCESORZE (CPU)
+- GPU jest ZNACZNIE szybsze do tego typu operacji
+- Alternatywy byłyby WOLNIEJSZE:
+  * Skrypt na każdej fishbone modyfikujący transform
+  * Animator na każdej fishbone
+  
+Wniosek dla studenta:
+- Gdy masz wiele obiektów robiących tę samą prostą rzecz (np. rotację)
+- Lepiej użyć shadera niż skryptów na każdym obiekcie
+
+
+Link.xml - Zaawansowane: Ochrona przed Code Stripping
+=====================================================
+
+Co to jest link.xml?
+-------------------
+To plik XML znajdujący się w folderze Assets, który chroni niektóre klasy
+przed usunięciem przez IL2CPP.
+
+Co to jest IL2CPP?
+-----------------
+IL2CPP to system Unity, który konwertuje kod C# na kod C++, a następnie na
+kod natywny (ARM dla telefonów). Robi to, aby gra była szybsza.
+
+Co to jest Code Stripping?
+--------------------------
+IL2CPP używa statycznej analizy kodu, aby znaleźć i USUNĄĆ nieużywane klasy.
+To zmniejsza rozmiar aplikacji (ważne dla gier mobilnych).
+
+Problem:
 -------
+Czasami IL2CPP "myśli", że klasa nie jest używana, ale tak naprawdę JEST.
+To się dzieje gdy:
+- Używamy refleksji (dynamic reflection)
+- Klasa jest ładowana przez nazwę jako string
+- Klasa jest w DLL zewnętrznej
 
-The game use custom shaders for most of its objects. This is due to the world
-curving downward, to both give an impression of longer distance, and to hide the
-horizon and the worst of the "popping" (sudden apparition) of the track piece being spawned.
-There is also a shader to rotate the fishbones. It is way more efficient to do
-it in the shader than with a script on each fishbones touching the transform, or
-through an animator.
+Jeśli IL2CPP usunie taką klasę, gra:
+- Nie skompiluje się, LUB
+- Skompiluje się ale wyrzuci błąd w trakcie działania (runtime error)
 
-Link.xml
---------
+Rozwiązanie - link.xml:
+-----------------------
+Dodanie klasy do link.xml WYMUSZA na Unity zachowanie tej klasy,
+nawet jeśli IL2CPP nie wykryje jej użycia.
 
-The link.xml file you can find in the Assets folder is used to exclude some
-classes from the code stripping that IL2CPP do. IL2CPP use static code analysis
-to strip all unused assemblies, but in some cases (dynamic reflections etc.)
-it can miss some, stripping them & thus resulting in compile or runtime error.
-Adding them to link.xml forces Unity to keep those assemblies even if it
-can't detect their use.
-See [https://docs.unity3d.com/Manual/iphone-playerSizeOptimization.html] for
-more complete info.
+Więcej informacji:
+------------------
+Zobacz dokumentację Unity: https://docs.unity3d.com/Manual/iphone-playerSizeOptimization.html
+
+Dla studenta:
+------------
+Jeśli po zbudowaniu gry na telefon coś przestaje działać, a w edytorze działa,
+może to być problem z code stripping. Sprawdź link.xml!
