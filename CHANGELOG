@@ -1,28 +1,26 @@
-## CHANGELOG
+## HISTORIA ZMIAN (CHANGELOG)
+
 # [1.3]
-- Updated for use with Addressables System 1.1.3 & 1.1.4.
-- Fixed compiling issues with various desktop and mobile platforms.
-- Removed unnecessary packages
-- Updated to run with 2019.3x engine
+- Zaktualizowano do współpracy z Addressables System 1.1.3 i 1.1.4
+- Naprawiono problemy z kompilacją na różnych platformach desktopowych i mobilnych
+- Usunięto niepotrzebne paczki (packages)
+- Zaktualizowano do działania z silnikiem Unity 2019.3x
 
 # [1.2]
-
-- Now use Addressable 0.8.1
-- Fixed Tutorial so that the 1st obstacle is always on the center lane.
-- Fixed a bug where control where disable on first run after tutorial.
+- Teraz używa Addressable 0.8.1
+- Naprawiono Tutorial tak, aby pierwsza przeszkoda zawsze była na środkowym torze
+- Naprawiono błąd, gdzie sterowanie było wyłączone przy pierwszym uruchomieniu po tutorialu
 
 # [1.1]
-
-- Updated to 18.2
-- Now use Addressable System
-- Now use Lightweight Rendering Pipeline
-- Added a Tutorial on first launch
-- Fixed typos
-- Jump can now be canceled to start sliding
-- Application now pause on lost of focus (e.g. Mobile notification menu opened)
-- Coin & Premium are credited as soon as grabbed so even if quit game mid run, keep what was gatehred
-- Some define fixed that were breaking compilation on iOS. 
+- Zaktualizowano do wersji 18.2
+- Teraz używa systemu Addressable
+- Teraz używa Lightweight Rendering Pipeline (lekki pipeline renderowania)
+- Dodano Tutorial przy pierwszym uruchomieniu
+- Naprawiono literówki
+- Skok może być teraz anulowany, aby rozpocząć ślizg
+- Aplikacja teraz pauzuje się przy utracie focusu (np. gdy otwarte jest menu powiadomień na telefonie)
+- Monety i Premium są teraz zapisywane natychmiast po zebraniu, więc nawet jeśli gracz wyjdzie z gry w trakcie biegu, zachowa to co zebrał
+- Naprawiono niektóre definicje (define), które powodowały błędy kompilacji na iOS
 
 # [1.0.1]
-
-- Updated to 2018.1
+- Zaktualizowano do Unity 2018.1
